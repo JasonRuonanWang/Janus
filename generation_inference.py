@@ -25,15 +25,22 @@ import numpy as np
 import os
 import PIL.Image
 
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+    device = torch.device("mps")
+else:
+    device = "cpu"
+
 # specify the path to the model
-model_path = "deepseek-ai/Janus-1.3B"
+model_path = "deepseek-ai/Janus-Pro-1B"
 vl_chat_processor: VLChatProcessor = VLChatProcessor.from_pretrained(model_path)
 tokenizer = vl_chat_processor.tokenizer
 
 vl_gpt: MultiModalityCausalLM = AutoModelForCausalLM.from_pretrained(
     model_path, trust_remote_code=True
 )
-vl_gpt = vl_gpt.to(torch.bfloat16).cuda().eval()
+vl_gpt = vl_gpt.to(torch.bfloat16).to(device).eval()
 
 conversation = [
     {
@@ -66,7 +73,7 @@ def generate(
     input_ids = vl_chat_processor.tokenizer.encode(prompt)
     input_ids = torch.LongTensor(input_ids)
 
-    tokens = torch.zeros((parallel_size*2, len(input_ids)), dtype=torch.int).cuda()
+    tokens = torch.zeros((parallel_size*2, len(input_ids)), dtype=torch.int).to(device)
     for i in range(parallel_size*2):
         tokens[i, :] = input_ids
         if i % 2 != 0:
@@ -74,7 +81,7 @@ def generate(
 
     inputs_embeds = mmgpt.language_model.get_input_embeddings()(tokens)
 
-    generated_tokens = torch.zeros((parallel_size, image_token_num_per_image), dtype=torch.int).cuda()
+    generated_tokens = torch.zeros((parallel_size, image_token_num_per_image), dtype=torch.int).to(device)
 
     for i in range(image_token_num_per_image):
         outputs = mmgpt.language_model.model(inputs_embeds=inputs_embeds, use_cache=True, past_key_values=outputs.past_key_values if i != 0 else None)
