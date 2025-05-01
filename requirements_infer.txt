@@ -1,0 +1,9 @@
+torch
+transformers
+timm
+accelerate
+sentencepiece
+attrdict
+einops
+modelscope
+
