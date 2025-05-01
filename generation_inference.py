@@ -20,6 +20,7 @@
 import torch
 from transformers import AutoModelForCausalLM
 
+from modelscope import snapshot_download
 from janus.models import MultiModalityCausalLM, VLChatProcessor
 import numpy as np
 import os
@@ -33,7 +34,8 @@ else:
     device = "cpu"
 
 # specify the path to the model
-model_path = "deepseek-ai/Janus-Pro-1B"
+model_path = snapshot_download('deepseek-ai/Janus-Pro-1B')
+
 vl_chat_processor: VLChatProcessor = VLChatProcessor.from_pretrained(model_path)
 tokenizer = vl_chat_processor.tokenizer
 
