@@ -3,6 +3,10 @@
 <!-- markdownlint-disable no-duplicate-header -->
 
 <div align="center">
+<h1> Enabling MPS on Apple silicon & macOS</h1>
+</div>
+
+<div align="center">
   <img src="images/logo.svg" width="60%" alt="DeepSeek LLM" />
 </div>
 <hr>
